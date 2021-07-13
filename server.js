@@ -24,7 +24,7 @@ const OwnerSchema = new mongoose.Schema({
 const ownerModel = mongoose.model('User', OwnerSchema);
 
 function userCollection() {
-    const collectionData = new ownerModel({
+    const sanaa = new ownerModel({
         email: 'sanaa.almoghraby@gmail.com',
         books: [
             {
@@ -41,30 +41,56 @@ function userCollection() {
             }
         ]
     })
-    console.log(collectionData);
-    // collectionData.save();
+    console.log(sanaa);
+    sanaa.save();
 }
 
 // userCollection();
 
 
 
-//localhost:3002/book?myEmail=sanaa.almoghraby@gmail.com
-server.get('/book',getBookinf)
+//localhost:3001/book?myEmail=sanaa.almoghraby@gmail.com
+server.get('/book', getBookinf)
 
-function getBookinf(req,res){
-    
-    const myEmail=req.query.myEmail;
-    ownerModel.find({email:myEmail,function(err,data){
-        if (err){
+server.post('/books', addNewbook)
+
+function getBookinf(req, res) {
+
+    const myEmail = req.query.myEmail;
+    ownerModel.find({ email: myEmail }, (err, data) => {
+        if (err) {
             res.send('not correct email')
-        }else{
+        } else {
             res.send(data[0].books)
         }
-        
-    }})
+
+    })
 
 }
+///////////////////////////////////////////////////////////////////////////
+
+function addNewbook(req, res) {
+
+    let { email, name, description, status, img } = req.body;
+    ownerModel.find({ email: myEmail }, (err, data) => {
+        if (err) {
+            res.send('not correct email')
+        } else {
+            data[0].books.push({
+                name: name,
+                description: description,
+                status: status,
+                img: img
+
+            })
+
+            data[0].save()
+            res.send(data[0].books)
+        }
+
+    })
+}
+
 
 
 server.get('/', homePageHandler);
