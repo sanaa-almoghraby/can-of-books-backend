@@ -6,9 +6,10 @@ const mongoose = require('mongoose')
 require('dotenv').config();
 const server = express();
 server.use(cors());
-
+server.use(express.json())
 const PORT = process.env.PORT;
 
+// mongodb://sanaa:sanaa#123@cluster0-shard-00-00.jn4uh.mongodb.net:27017,cluster0-shard-00-01.jn4uh.mongodb.net:27017,cluster0-shard-00-02.jn4uh.mongodb.net:27017/book?ssl=true&replicaSet=atlas-ow5lhc-shard-0&authSource=admin&retryWrites=true&w=majority
 mongoose.connect('mongodb://localhost:27017/book', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const BookSchema = new mongoose.Schema({
@@ -24,7 +25,7 @@ const OwnerSchema = new mongoose.Schema({
 const ownerModel = mongoose.model('User', OwnerSchema);
 
 function userCollection() {
-    const collectionData = new ownerModel({
+    const sanaa = new ownerModel({
         email: 'sanaa.almoghraby@gmail.com',
         books: [
             {
@@ -41,30 +42,128 @@ function userCollection() {
             }
         ]
     })
-    console.log(collectionData);
-    // collectionData.save();
+    console.log(sanaa);
+    sanaa.save();
 }
 
 // userCollection();
 
 
 
-//localhost:3002/book?myEmail=sanaa.almoghraby@gmail.com
-server.get('/book',getBookinf)
+//localhost:3001/book?myEmail=sanaa.almoghraby@gmail.com
+server.get('/book', getBookinf)
 
-function getBookinf(req,res){
-    
-    const myEmail=req.query.myEmail;
-    ownerModel.find({email:myEmail,function(err,data){
-        if (err){
+server.post('/addbooks', addNewbook)
+server.delete('/delebook/:id', deletbook)
+server.put('/updatebooks/:id', updatebook)
+
+
+
+function getBookinf(req, res) {
+
+    const myEmail = req.query.myEmail;
+    ownerModel.find({ email: myEmail }, (err, data) => {
+        if (err) {
             res.send('not correct email')
-        }else{
+        } else {
             res.send(data[0].books)
         }
-        
-    }})
+
+    })
 
 }
+///////////////////////////////////////////////////////////////////////////
+
+function addNewbook(req, res) {
+
+    let { email, name, description, status, img } = req.body;
+    // console.log('ssssssssssss', req.body);
+    ownerModel.find({ email: email }, (err, data) => {
+        if (err) {
+            res.send('not correct email')
+        } else {
+            data[0].books.push({
+
+                name: name,
+                description: description,
+                status: status,
+                img: img
+
+            })
+
+            data[0].save()
+            res.send(data[0].books)
+        }
+
+    })
+}
+/////////////////////////////////////////////////////////////
+
+function deletbook(req, res) {
+    let { email } = req.query;
+    let indx = Number(req.params.id);
+    ownerModel.find({ email: email }, (err, data) => {
+        if (err) {
+            res.send('not correct email')
+        } else {
+            const resdele = data[0].books.filter((elem, index) => {
+                if (index !== indx) {
+                    return elem;
+                }
+            })
+            data[0].books = resdele
+            // console.log('sssssssssss', data[0].books);
+            data[0].save()
+            res.send(data[0].books)
+        }
+
+    })
+
+
+}
+////////////////////////////////////////////////////////////////////////////
+function updatebook(req, res) {
+    let { email, namebook, descriptionbook, statusbook, imgbook } = req.body;
+    console.log(req.body);
+    let indx = Number(req.params.id);
+    ownerModel.findOne({ email: email }, (err, data) => {
+        if (err) {
+            res.send('not correct email')
+        } else {
+            const resdele = data[0].books.filter((elem, index) => {
+                if (index !== indx) {
+                    return elem;
+                }else{
+                    elem={
+                                name: namebook,
+                                description: descriptionbook,
+                                status: statusbook,
+                                img: imgbook
+                            }
+                            return elem;
+                }
+
+            })
+            data[0].books=resdele
+            //  {
+            //     data.books.splice(indx, 1, {
+            //         name: namebook,
+            //         description: descriptionbook,
+            //         status: statusbook,
+            //         img: imgbook
+            //     });
+
+        }
+
+        console.log(data);
+        data.save();
+        res.send(data.books);
+    });
+
+}
+
+
+
 
 
 server.get('/', homePageHandler);
