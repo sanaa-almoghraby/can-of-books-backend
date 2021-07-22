@@ -123,35 +123,37 @@ function deletbook(req, res) {
 }
 ////////////////////////////////////////////////////////////////////////////
 function updatebook(req, res) {
-    let { email, namebook, descriptionbook, statusbook, imgbook } = req.body;
+    let { email, name, description, status, img } = req.body;
     console.log(req.body);
     let indx = Number(req.params.id);
+    console.log('ccccccccccc',indx);
     ownerModel.findOne({ email: email }, (err, data) => {
         if (err) {
             res.send('not correct email')
-        } else {
-            const resdele = data[0].books.filter((elem, index) => {
-                if (index !== indx) {
-                    return elem;
-                }else{
-                    elem={
-                                name: namebook,
-                                description: descriptionbook,
-                                status: statusbook,
-                                img: imgbook
-                            }
-                            return elem;
-                }
 
-            })
-            data[0].books=resdele
-            //  {
-            //     data.books.splice(indx, 1, {
-            //         name: namebook,
-            //         description: descriptionbook,
-            //         status: statusbook,
-            //         img: imgbook
-            //     });
+        } else {
+            // const resdele = data[0].books.filter((elem, index) => {
+            //     if (index !== indx) {
+            //         return elem;
+            //     }else{
+            //         elem={
+            //                     name: namebook,
+            //                     description: descriptionbook,
+            //                     status: statusbook,
+            //                     img: imgbook
+            //                 }
+            //                 return elem;
+            //     }
+
+            // })
+            // data[0].books=resdele
+             
+                data.books.splice(indx, 1, {
+                    name: name,
+                    description: description,
+                    status: status,
+                    img: img
+                });
 
         }
 
@@ -161,9 +163,6 @@ function updatebook(req, res) {
     });
 
 }
-
-
-
 
 
 server.get('/', homePageHandler);
